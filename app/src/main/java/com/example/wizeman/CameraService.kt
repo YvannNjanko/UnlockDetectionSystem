@@ -58,6 +58,7 @@ class CameraService : Service() {
         }
     }
 
+
     private fun getFrontFacingCameraId(): String? {
         try {
             for (cameraId in cameraManager.cameraIdList) {
