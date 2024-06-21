@@ -1,20 +1,23 @@
 package com.example.wizeman
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.ImageFormat
 import android.hardware.camera2.*
+import android.location.Location
 import android.media.ImageReader
 import android.media.MediaScannerConnection
+import android.os.Build
 import android.os.Environment
 import android.os.IBinder
 import android.util.Log
-import android.util.Size
-import android.view.Surface
-import android.widget.Toast
-import androidx.core.content.ContextCompat
+import androidx.core.app.NotificationCompat
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,21 +25,50 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 class CameraService : Service() {
 
     private lateinit var cameraManager: CameraManager
+    private lateinit var locationService: LocationService
     private var cameraDevice: CameraDevice? = null
     private var captureSession: CameraCaptureSession? = null
     private lateinit var imageReader: ImageReader
     private lateinit var captureRequestBuilder: CaptureRequest.Builder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        locationService = LocationService(this)
         cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        startForegroundService()
         startCamera()
         return START_NOT_STICKY
+    }
+
+    private fun startForegroundService() {
+        val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel("my_service", "My Background Service")
+        } else {
+            ""
+        }
+
+        val notification: Notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Camera Service")
+            .setContentText("Capturing image after failed unlock attempts.")
+            .setSmallIcon(R.drawable.ic_notification) // Replace with your app's notification icon
+            .build()
+
+        startForeground(1, notification)
+    }
+
+    private fun createNotificationChannel(channelId: String, channelName: String): String {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val chan = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_NONE)
+            chan.lightColor = android.graphics.Color.BLUE
+            chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+            val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            service.createNotificationChannel(chan)
+        }
+        return channelId
     }
 
     private fun startCamera() {
@@ -49,7 +81,7 @@ class CameraService : Service() {
                 }
                 cameraManager.openCamera(cameraId, stateCallback, null)
             } else {
-                Log.e(TAG, "Pas de camera frontale trouvee")
+                Log.e(TAG, "No front-facing camera found")
                 stopSelf()
             }
         } catch (e: CameraAccessException) {
@@ -57,7 +89,6 @@ class CameraService : Service() {
             stopSelf()
         }
     }
-
 
     private fun getFrontFacingCameraId(): String? {
         try {
@@ -119,7 +150,7 @@ class CameraService : Service() {
         try {
             captureSession?.capture(captureRequestBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
                 override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
-                    Log.d(TAG, "Capture effectuee")
+                    Log.d(TAG, "Image captured")
                 }
             }, null)
         } catch (e: CameraAccessException) {
@@ -151,30 +182,39 @@ class CameraService : Service() {
                     fos.write(imageBytes)
                 }
                 MediaScannerConnection.scanFile(this, arrayOf(imageFile.absolutePath), null, null)
-                Log.d(TAG, "Image Sauvegardee: ${imageFile.absolutePath}")
+                Log.d(TAG, "Image saved: ${imageFile.absolutePath}")
 
-                // Envoyer l'image par email
-                sendImageByEmail(imageFile.absolutePath)
+                // Send the image by email
+                sendImageByEmail(imageFile.absolutePath, imageBytes)
 
             } else {
-                Log.e(TAG, "Dossier de Stockage impossible a trouver/acceder")
+                Log.e(TAG, "Unable to access storage directory")
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun sendImageByEmail(imagePath: String) {
-        val email = "yvannjanko04@gmail.com"
-        val subject = "Image Capturée"
-        val body = "Voici l'image capturée après un échec de déverrouillage."
+    // send mail
+    private fun sendImageByEmail(imagePath: String, imageBytes: ByteArray) {
+        CoroutineScope(Dispatchers.Main).launch {
+            val location: Location? = locationService.getCurrentLocation()
+            location?.let {
+                val latitude = it.latitude
+                val longitude = it.longitude
+                val user = FirebaseAuth.getInstance().currentUser
+                val email = user?.email ?: "obsliferluka@gmail.com" // Default email if user is not logged in
+                val subject = "Captured Image"
+                val body = "Here is the image captured after a failed unlock attempt."
 
-        // Initialiser le MailSender avec votre adresse email et le mot de passe d'application
-        val mailSender = MailSender("yvannjanko04@gmail.com", "rvly uhkw rxnu snmv")
+                // Initialize the MailSender with your email and app-specific password
+                val mailSender = MailSender("obsliferluka@gmail.com", "pkqq ccaz xybq slmv")
 
-        // Envoyer l'email dans un coroutine
-        CoroutineScope(Dispatchers.IO).launch {
-            mailSender.sendMail(subject, body, listOf(email), imagePath)
+                // Send the email in a coroutine
+                CoroutineScope(Dispatchers.IO).launch {
+                    mailSender.sendMail(subject, body, listOf(email), imageBytes, imagePath, latitude, longitude)
+                }
+            }
         }
     }
 
@@ -183,6 +223,6 @@ class CameraService : Service() {
     }
 
     companion object {
-        private const val TAG = "CameraService"
+        const val TAG = "CameraService"
     }
 }

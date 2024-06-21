@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -48,6 +49,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.firebase.appcheck.playintegrity)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -70,7 +72,26 @@ dependencies {
 
     // Google API dependencies
     implementation ("com.google.android.gms:play-services-maps:18.2.0")
-    implementation ("com.google.android.gms:play-services-location:21.2.0")
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
+
+    //firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+    implementation(platform("com.google.firebase:firebase-bom:32.6.0"))
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+
+
+    // meteo
+    implementation("com.squareup.okhttp3:okhttp:4.9.2")
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation("com.squareup.picasso:picasso:2.8")
+
+    // gemini
+    implementation("com.google.ai.client.generativeai:generativeai:0.7.0")
+
 
     //camera
     dependencies {

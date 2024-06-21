@@ -21,8 +21,18 @@
                 android:id="@+id/enableAdminButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:insetLeft="100dp"
                 android:text="Enable Device Administrator"
                 android:visibility="visible" />
+
+            <Button
+                android:id="@+id/historiqueButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:insetLeft="150dp"
+                android:insetTop="600dp"
+                android:text="historique"
+                android:textAlignment="center" />
 
         </LinearLayout>
     </ScrollView>

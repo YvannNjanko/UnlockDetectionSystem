@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "532879160562",
+    "project_id": "wizeman-7fcbf",
+    "storage_bucket": "wizeman-7fcbf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:532879160562:android:538717e72d08df0b9e4c6b",
+        "android_client_info": {
+          "package_name": "com.example.wizeman"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "532879160562-3obnif4ic5fg4s3j8pv253g6p4l0tbcb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.wizeman",
+            "certificate_hash": "1bc4a9e954ae7c4738a81ae2c6b6bee261f61b0e"
+          }
+        },
+        {
+          "client_id": "532879160562-rh1gk0qjjk6f037a0466ifdr92clvtmd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHErL3cQbA3zYeUSXcI3-17htkQdixpWg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "532879160562-rh1gk0qjjk6f037a0466ifdr92clvtmd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

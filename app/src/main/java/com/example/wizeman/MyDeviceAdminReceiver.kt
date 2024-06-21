@@ -21,17 +21,6 @@ class MyDeviceAdminReceiver : DeviceAdminReceiver() {
         showToast(context, "onEnabled")
     }
 
-    override fun onDisableRequested(context: Context, intent: Intent): CharSequence =
-        "onDisableRequested"
-
-    override fun onDisabled(context: Context, intent: Intent) {
-        Log.i(TAG, "onDisabled")
-        showToast(context, "onDisabled")
-    }
-
-    override fun onPasswordChanged(context: Context, intent: Intent, userHandle: UserHandle) =
-        showToast(context, "onPasswordChanged")
-
     override fun onPasswordSucceeded(context: Context, intent: Intent, userHandle: UserHandle) {
         Log.i(TAG, "onPasswordSucceeded")
         showToast(context, "onPasswordSucceeded")
